@@ -1,0 +1,12 @@
+pre-commit:
+  commands:
+    format:
+      glob: "**/*.rs"
+      run: rustfmt {staged_files}
+    lint:
+      glob: "**/*.rs"
+      run: cargo clippy
+
+commit-msg:
+  template-checker:
+    runner: bash
