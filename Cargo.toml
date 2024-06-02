@@ -1,0 +1,3 @@
+[workspace]
+members = [ "luc", "luc-*" ]
+resolver = "2"

@@ -1,0 +1,16 @@
+[package]
+name = "luc-cli"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["serramatutu"]
+description = "Run pre-configured requests with style"
+homepage = "https://github.com/serramatutu/luc"
+repository = "https://github.com/serramatutu/luc"
+keywords = ["luc", "request-runner", "cli"]
+readme = "README.md"
+rust-version = "1.78"
+
+[dependencies]
+luc = { path = "../luc" }
+

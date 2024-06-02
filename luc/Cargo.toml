@@ -1,0 +1,20 @@
+[package]
+name = "luc"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["serramatutu"]
+description = "Run pre-configured requests with style"
+homepage = "https://github.com/serramatutu/luc"
+repository = "https://github.com/serramatutu/luc"
+keywords = ["luc", "request-runner", "cli"]
+readme = "README.md"
+rust-version = "1.78"
+
+[dependencies]
+markdown = "1.0.0-alpha.17"
+minijinja = "2.0.1"
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"
+serde_yaml = "0.9.34"
+thiserror = "1.0.61"
