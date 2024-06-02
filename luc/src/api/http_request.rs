@@ -99,7 +99,9 @@ fn markdown_get_config_blocks(md_raw: &str) -> Result<Vec<MarkdownConfigBlock>, 
         .collect()
 }
 
-impl TemplateFile<HttpRequestBuilder, RequestFileError> for HttpRequestBuilder {
+impl TemplateFile for HttpRequestBuilder {
+    type T = HttpRequestBuilder;
+    type E = RequestFileError;
     fn from_template(
         path: &str,
         ctx: &Context,
