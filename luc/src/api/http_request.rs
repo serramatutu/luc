@@ -40,24 +40,26 @@ pub struct HttpRequestBuilder {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct HttpRequestBuilderSpec {
+pub struct Spec<T> {
     api: String,
-    spec: HttpRequestBuilder,
+    spec: T,
 }
 
+type HttpRequestBuilderSpec = Spec<HttpRequestBuilder>;
+
 #[derive(Debug)]
-enum MarkdownPreludeType {
+enum MarkdownConfigBlockType {
     Yaml,
     Json,
 }
 
 #[derive(Debug)]
-struct MarkdownPrelude {
-    kind: MarkdownPreludeType,
+struct MarkdownConfigBlock {
+    kind: MarkdownConfigBlockType,
     text: String,
 }
 
-fn markdown_get_prelude(md_raw: &str) -> Result<MarkdownPrelude, RequestFileError> {
+fn markdown_get_config_blocks(md_raw: &str) -> Result<Vec<MarkdownConfigBlock>, RequestFileError> {
     let mut md_ast = ok!(
         markdown::to_mdast(md_raw, &markdown::ParseOptions::gfm()),
         RequestFileError::SyntaxError
@@ -69,50 +71,77 @@ fn markdown_get_prelude(md_raw: &str) -> Result<MarkdownPrelude, RequestFileErro
         return Err(RequestFileError::EmptyFile);
     }
 
-    let code = match children.swap_remove(0) {
-        markdown::mdast::Node::Code(code) => code,
-        _ => return Err(RequestFileError::UnsupportedPreludeType),
-    };
+    children
+        .iter_mut()
+        .filter_map(|block| match block {
+            markdown::mdast::Node::Code(code) => match code.meta.as_deref() {
+                Some("luc") => Some(code),
+                _ => None,
+            },
+            _ => None,
+        })
+        .map(|code| {
+            let lang = code
+                .lang
+                .as_ref()
+                .ok_or(RequestFileError::UnsupportedBlockType)?;
+            let block = MarkdownConfigBlock {
+                kind: match lang.as_str() {
+                    "yaml" => MarkdownConfigBlockType::Yaml,
+                    "json" => MarkdownConfigBlockType::Json,
+                    _ => return Err(RequestFileError::UnsupportedBlockType),
+                },
+                text: std::mem::take(&mut code.value),
+            };
 
-    let lang = code.lang.ok_or(RequestFileError::UnsupportedPreludeType)?;
-    let prelude = MarkdownPrelude {
-        kind: match lang.as_str() {
-            "yaml" => MarkdownPreludeType::Yaml,
-            "json" => MarkdownPreludeType::Json,
-            _ => return Err(RequestFileError::UnsupportedPreludeType),
-        },
-        text: code.value,
-    };
-
-    Ok(prelude)
+            Ok(block)
+        })
+        .collect()
 }
 
 impl TemplateFile<HttpRequestBuilder, RequestFileError> for HttpRequestBuilder {
-    fn from_template(path: &str, ctx: Context) -> Result<HttpRequestBuilder, RequestFileError> {
+    fn from_template(
+        path: &str,
+        ctx: Context,
+    ) -> Result<Vec<HttpRequestBuilder>, RequestFileError> {
         let md_raw = ok!(
             std::fs::read_to_string(path),
             RequestFileError::DoesNotExist
         );
 
-        let prelude = markdown_get_prelude(&md_raw)?;
+        let blocks = markdown_get_config_blocks(&md_raw)?;
 
         let mut env = Environment::new();
-        env.add_template(path, &prelude.text).unwrap();
-        let md_template = env.get_template(path).unwrap();
+        let builders: Result<Vec<HttpRequestBuilder>, RequestFileError> = blocks
+            .into_iter()
+            .enumerate()
+            .map(|(i, block)| {
+                let template_name = format!("{}.{}", path, i);
 
-        let render = md_template.render(ctx.to_jinja_context()).unwrap();
+                env.add_template_owned(template_name.to_owned(), block.text)
+                    .unwrap();
+                let md_template = env.get_template(template_name.as_str()).unwrap();
+                let render = md_template.render(ctx.to_jinja_context()).unwrap();
 
-        let builder_spec: HttpRequestBuilderSpec = match prelude.kind {
-            MarkdownPreludeType::Yaml => ok!(
-                serde_yaml::from_str(&render),
-                RequestFileError::UnsupportedPreludeType
-            ),
-            MarkdownPreludeType::Json => ok!(
-                serde_json::from_str(&render),
-                RequestFileError::UnsupportedPreludeType
-            ),
-        };
+                let builder_spec: HttpRequestBuilderSpec = match block.kind {
+                    MarkdownConfigBlockType::Yaml => ok!(
+                        serde_yaml::from_str(&render),
+                        RequestFileError::InvalidBlockSpec
+                    ),
+                    MarkdownConfigBlockType::Json => ok!(
+                        serde_json::from_str(&render),
+                        RequestFileError::InvalidBlockSpec
+                    ),
+                };
 
-        Ok(builder_spec.spec)
+                if builder_spec.api != "luc.api.http_request.HttpRequestBuilder" {
+                    return Err(RequestFileError::InvalidBlockApi);
+                }
+
+                Ok(builder_spec.spec)
+            })
+            .collect();
+
+        builders
     }
 }

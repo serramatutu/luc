@@ -11,12 +11,14 @@ pub enum RequestFileError {
     #[error("request file is empty")]
     EmptyFile,
 
-    #[error("request file prelude must be a YAML or JSON code block")]
-    UnsupportedPreludeType,
+    #[error("request code block must be YAML or JSON")]
+    UnsupportedBlockType,
 
-    #[error("request file prelude api must be luc.api.v1.HttpRequestBuilder")]
-    InvalidPreludeApi,
+    #[error("request code block api must be luc.api.http_request.HttpRequestBuilder")]
+    InvalidBlockApi,
 
-    #[error("request file prelude spec must conform to struct luc.api.v1.HttpRequestBuilder")]
-    InvalidPreludeSpec,
+    #[error(
+        "request code block spec must conform to struct luc.api.http_request.HttpRequestBuilder"
+    )]
+    InvalidBlockSpec,
 }

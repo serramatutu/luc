@@ -59,11 +59,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "memo-map"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "374c335b2df19e62d4cb323103473cbc6510980253119180de862d89184f6a83"
+
+[[package]]
 name = "minijinja"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7165d0e94806d52ad5295e4b54a95176d831814840bc067298ca647e1c956338"
 dependencies = [
+ "memo-map",
+ "self_cell",
  "serde",
 ]
 
@@ -90,6 +98,12 @@ name = "ryu"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
+
+[[package]]
+name = "self_cell"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d369a96f978623eb3dc28807c4852d6cc617fed53da5d3c400feff1ef34a714a"
 
 [[package]]
 name = "serde"

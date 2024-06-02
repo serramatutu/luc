@@ -1,4 +1,13 @@
+# Fetch all posts
+This request fetches all posts from the server.
+
+The following code will not be run by `luc` since it is untagged
 ```yaml
+foo: bar
+```
+
+## Request definition
+```yaml luc
 api: luc.api.http_request.HttpRequestBuilder
 spec:
   request:
@@ -10,7 +19,4 @@ spec:
     before: python all.py
     after: python all.py
 ```
-
-# Fetch all posts
-This request fetches all posts from the server.
 
