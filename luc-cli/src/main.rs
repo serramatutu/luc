@@ -1,13 +1,33 @@
+use clap::Parser;
+
 use luc::api::http_request::HttpRequestBuilder;
 use luc::context::Context;
+use luc::errors::RequestFileError;
 use luc::traits::TemplateFile;
 
+mod cli;
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let ctx = Context::from_environment();
+    let args = cli::Cli::parse();
 
-    let builder = HttpRequestBuilder::from_template("examples/python/posts/all.md", ctx)?;
+    let cmd_result: Result<(), Box<dyn std::error::Error>> = match args.command {
+        cli::Commands::Run { files } => {
+            let ctx = Context::from_environment();
 
-    println!("{:#?}", builder);
+            let builders_raw: Vec<Vec<HttpRequestBuilder>> = files
+                .iter()
+                .map(|file| HttpRequestBuilder::from_template(file, &ctx))
+                .collect::<Result<Vec<Vec<HttpRequestBuilder>>, RequestFileError>>()?;
+
+            let builders: Vec<HttpRequestBuilder> = builders_raw.into_iter().flatten().collect();
+
+            println!("{:#?}", builders);
+
+            Ok(())
+        }
+    };
+
+    cmd_result?;
 
     Ok(())
 }

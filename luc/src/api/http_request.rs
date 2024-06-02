@@ -102,7 +102,7 @@ fn markdown_get_config_blocks(md_raw: &str) -> Result<Vec<MarkdownConfigBlock>, 
 impl TemplateFile<HttpRequestBuilder, RequestFileError> for HttpRequestBuilder {
     fn from_template(
         path: &str,
-        ctx: Context,
+        ctx: &Context,
     ) -> Result<Vec<HttpRequestBuilder>, RequestFileError> {
         let md_raw = ok!(
             std::fs::read_to_string(path),
