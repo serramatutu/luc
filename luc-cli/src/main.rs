@@ -7,7 +7,8 @@ use luc::traits::TemplateFile;
 
 mod cli;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = cli::Cli::parse();
 
     let cmd_result: Result<(), Box<dyn std::error::Error>> = match args.command {
@@ -21,7 +22,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let builders: Vec<HttpRequestBuilder> = builders_raw.into_iter().flatten().collect();
 
-            println!("{:#?}", builders);
+            let results = luc::runner::run(builders, ctx).await;
+
+            println!("{:#?}", results);
 
             Ok(())
         }

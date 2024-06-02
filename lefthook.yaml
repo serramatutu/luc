@@ -2,7 +2,7 @@ pre-commit:
   commands:
     format:
       glob: "**/*.rs"
-      run: rustfmt {staged_files}
+      run: rustfmt --edition 2021 {staged_files}
       stage_fixed: true
     lint:
       glob: "**/*.rs"

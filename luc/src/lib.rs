@@ -4,4 +4,5 @@ mod macros;
 pub mod api;
 pub mod context;
 pub mod errors;
+pub mod runner;
 pub mod traits;

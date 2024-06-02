@@ -21,22 +21,22 @@ pub enum HttpRequestMethod {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HttpRequest {
-    method: HttpRequestMethod,
-    url: String,
-    headers: HashMap<String, String>,
-    body: Option<String>,
+    pub method: HttpRequestMethod,
+    pub url: String,
+    pub headers: HashMap<String, String>,
+    pub body: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HttpRequestBuilderHooks {
-    before: Option<String>,
-    after: Option<String>,
+    pub before: Option<String>,
+    pub after: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HttpRequestBuilder {
-    request: HttpRequest,
-    hooks: HttpRequestBuilderHooks,
+    pub request: HttpRequest,
+    pub hooks: HttpRequestBuilderHooks,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
