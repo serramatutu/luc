@@ -3,6 +3,7 @@ pre-commit:
     format:
       glob: "**/*.rs"
       run: rustfmt {staged_files}
+      stage_fixed: true
     lint:
       glob: "**/*.rs"
       run: cargo clippy
